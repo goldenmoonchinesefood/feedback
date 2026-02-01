@@ -10,8 +10,11 @@
         h1 { font-size: 22px; color: #333; }
         .stars { font-size: 40px; margin: 20px 0; cursor: pointer; }
         button { background: #ff4757; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-        #complaint-form { display: none; }
+        /* Hide screens by default */
+        #complaint-form, #thank-you-step { display: none; }
         textarea { width: 100%; height: 100px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-sizing: border-box; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ff4757; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -24,10 +27,17 @@
             <p>Select a star to begin</p>
         </div>
 
+        <div id="thank-you-step">
+            <h2>Thank you!</h2>
+            <p>We are so glad you enjoyed your meal.</p>
+            <p><strong>Redirecting you to our Google review page...</strong></p>
+            <div class="loader"></div>
+        </div>
+
         <div id="complaint-form">
             <h2>We're sorry!</h2>
-            <p>What could we have done better? The owner will see this immediately.</p>
-            <textarea id="feedback-text" placeholder="Cold food? Missing item? Let us know..."></textarea>
+            <p>Please provide feedback to let us know what we could have done better.</p>
+            <textarea id="feedback-text" placeholder="Let us know what we could have done better here."></textarea>
             <button onclick="sendToDiscord()">Submit Feedback</button>
         </div>
     </div>
@@ -37,27 +47,38 @@
         const GOOGLE_REVIEW_URL = "https://g.page/r/CcTqUF1pVIoHEBM/review";
 
         function handleRating(stars) {
+            // Hide the initial rating step
+            document.getElementById('rating-step').style.display = 'none';
+
             if (stars >= 4) {
-                // Happy customer! Send them to Google.
-                window.location.href = GOOGLE_REVIEW_URL;
+                // Show Thank You screen
+                document.getElementById('thank-you-step').style.display = 'block';
+                
+                // Wait 3 seconds, then redirect
+                setTimeout(() => {
+                    window.location.href = GOOGLE_REVIEW_URL;
+                }, 3000);
             } else {
-                // Unhappy customer. Keep them here.
-                document.getElementById('rating-step').style.display = 'none';
+                // Show Complaint Form
                 document.getElementById('complaint-form').style.display = 'block';
             }
         }
 
         async function sendToDiscord() {
             const text = document.getElementById('feedback-text').value;
+            if (!text.trim()) {
+                alert("Please enter some feedback.");
+                return;
+            }
+
             await fetch(DISCORD_WEBHOOK, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: `🚨 **Negative Feedback Received:**\n"${text}"` })
             });
-            alert("Thank you. We've received your message and will look into it immediately.");
+            alert("Thank you. We've received your message.");
             window.location.reload();
         }
     </script>
 </body>
 </html>
-
