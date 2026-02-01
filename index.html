@@ -26,22 +26,23 @@
 
         <div id="complaint-form">
             <h2>We're sorry!</h2>
-            <p>What could we have done better? The owner will see this immediately.</p>
-            <textarea id="feedback-text" placeholder="Cold food? Missing item? Let us know..."></textarea>
+            <p>Please provide feedback to let us know what we could have done better.</p>
+            <textarea id="feedback-text" placeholder="Let us know what we could have done better here."></textarea>
             <button onclick="sendToDiscord()">Submit Feedback</button>
         </div>
     </div>
 
-    <script>
+<script>
         const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1467332650619638009/Cel5FVYJtDAhLEW6PRoelvck178U9bt6OH0mdpZ_2WIJcso3wloO5R9zkQDmXnrvHwaK";
         const GOOGLE_REVIEW_URL = "https://g.page/r/CcTqUF1pVIoHEBM/review";
 
         function handleRating(stars) {
             if (stars >= 4) {
-                // Happy customer! Send them to Google.
+                // Happy customer! Show message and then send them to Google.
+                alert("You will be sent to our Google review page. Please provide your feedback there, thank you!");
                 window.location.href = GOOGLE_REVIEW_URL;
             } else {
-                // Unhappy customer. Keep them here.
+                // Unhappy customer. Keep them here for the complaint form.
                 document.getElementById('rating-step').style.display = 'none';
                 document.getElementById('complaint-form').style.display = 'block';
             }
@@ -49,6 +50,12 @@
 
         async function sendToDiscord() {
             const text = document.getElementById('feedback-text').value;
+            
+            if (!text.trim()) {
+                alert("Please enter some feedback before submitting.");
+                return;
+            }
+
             await fetch(DISCORD_WEBHOOK, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
