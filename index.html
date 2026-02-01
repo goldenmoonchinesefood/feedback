@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Your Meal</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; text-align: center; padding: 40px 20px; background: #fdfdfd; }
+        .container { max-width: 400px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1 { font-size: 22px; color: #333; }
+        .stars { font-size: 40px; margin: 20px 0; cursor: pointer; }
+        button { background: #ff4757; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        #complaint-form { display: none; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="rating-step">
+            <h1>How was your meal?</h1>
+            <div class="stars">
+                <span onclick="handleRating(1)">⭐</span><span onclick="handleRating(2)">⭐</span><span onclick="handleRating(3)">⭐</span><span onclick="handleRating(4)">⭐</span><span onclick="handleRating(5)">⭐</span>
+            </div>
+            <p>Select a star to begin</p>
+        </div>
+
+        <div id="complaint-form">
+            <h2>We're sorry!</h2>
+            <p>What could we have done better? The owner will see this immediately.</p>
+            <textarea id="feedback-text" placeholder="Cold food? Missing item? Let us know..."></textarea>
+            <button onclick="sendToDiscord()">Submit Feedback</button>
+        </div>
+    </div>
+
+    <script>
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1467332650619638009/Cel5FVYJtDAhLEW6PRoelvck178U9bt6OH0mdpZ_2WIJcso3wloO5R9zkQDmXnrvHwaK";
+        const GOOGLE_REVIEW_URL = "https://g.page/r/CcTqUF1pVIoHEBM/review";
+
+        function handleRating(stars) {
+            if (stars >= 4) {
+                // Happy customer! Send them to Google.
+                window.location.href = GOOGLE_REVIEW_URL;
+            } else {
+                // Unhappy customer. Keep them here.
+                document.getElementById('rating-step').style.display = 'none';
+                document.getElementById('complaint-form').style.display = 'block';
+            }
+        }
+
+        async function sendToDiscord() {
+            const text = document.getElementById('feedback-text').value;
+            await fetch(DISCORD_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: `🚨 **Negative Feedback Received:**\n"${text}"` })
+            });
+            alert("Thank you. We've received your message and will look into it immediately.");
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>
